@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Keyboard Master - A browser-based keyboard clicking game.">
+    <title>Keyboard Master</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <header>
+            <h1>KEYBOARD <span class="highlight">MASTER</span></h1>
+            <div id="status-bar">
+                <div class="stat-box">
+                    <span class="label">Total Presses</span>
+                    <span id="total-presses" class="value">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="label">Presses/Sec</span>
+                    <span id="pps" class="value">0.0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="label">Keys Unlocked</span>
+                    <span id="keys-unlocked" class="value">1</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div id="left-panel">
+                <div class="panel upgrades-panel">
+                    <h2>Upgrades</h2>
+                    <div id="upgrades-list" class="scroll-list">
+                        <!-- Upgrades populated via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="center-panel">
+                <div id="key-display">
+                    <div class="key massive-key" id="main-key">SPACE</div>
+                    <div id="floating-text-container"></div>
+                </div>
+                <div id="active-minigame" class="hidden">
+                    <!-- Minigame UI -->
+                </div>
+
+
+
+                <p class="instruction">Press <span id="target-key-name">SPACE</span> to generate presses!</p>
+                <div id="active-keys-list"
+                    style="margin-top:0.5rem; color:var(--text-muted); font-size:0.9rem; text-align:center; max-width:400px; word-wrap:break-word;">
+                    Active Keys: Space, W, A, S, D
+                </div>
+
+                <div class="minigame-selector-panel">
+                    <h3>Minigames</h3>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button id="btn-speed" class="challenge-btn">Speed Challenge</button>
+                        <button id="btn-reaction" class="challenge-btn">Reaction Test</button>
+                    </div>
+                    <div id="minigame-status" style="margin-top:5px; color:var(--secondary-color); font-size:0.9rem;">
+                        Ready</div>
+                </div>
+            </div>
+
+            <div id="right-panel">
+                <div class="panel achievements-panel">
+                    <h2>Achievements</h2>
+                    <div id="achievements-list" class="scroll-list">
+                        <!-- Achievements populated via JS -->
+                    </div>
+                </div>
+                <div class="panel leaderboard-panel">
+                    <h2>Leaderboard</h2>
+                    <div id="leaderboard-list" class="scroll-list">
+                        <!-- Leaderboard entries -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="minigame-overlay" class="hidden">
+            <div class="minigame-content">
+                <h2 id="minigame-title">Speed Challenge</h2>
+                <p id="minigame-desc">Press as fast as you can!</p>
+                <div id="minigame-timer">Time: 10s</div>
+                <div id="minigame-score">Score: 0</div>
+                <button id="start-minigame-btn">Start</button>
+                <div id="minigame-play-area"></div>
+            </div>
+
+        </div>
+
+        <div id="corner-counter" class="corner-stat">
+            <div class="label">Next Key Unlock</div>
+            <div id="corner-progress" style="font-weight:bold; color:var(--accent-color)">0 / 1000</div>
+            <div id="corner-remaining" style="font-size:0.8em; color:var(--text-muted)">1000 to go</div>
+        </div>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
