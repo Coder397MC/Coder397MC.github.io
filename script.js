@@ -117,6 +117,34 @@ const ACHIEVEMENTS = [
         desc: 'Reach 1,000,000 total presses.',
         condition: (game) => game.stats.totalPresses >= 1000000,
         icon: '💎'
+    },
+    {
+        id: 'unlock_q',
+        name: 'The Letter Q',
+        desc: 'Unlock the Q key.',
+        condition: (game) => game.state.unlockedKeys.includes('q'),
+        icon: '🇶'
+    },
+    {
+        id: 'unlock_p',
+        name: 'Top Row Titan',
+        desc: 'Unlock the P key (Complete Top Row).',
+        condition: (game) => game.state.unlockedKeys.includes('p'),
+        icon: '🅿️'
+    },
+    {
+        id: 'unlock_z',
+        name: 'The Letter Z',
+        desc: 'Unlock the Z key.',
+        condition: (game) => game.state.unlockedKeys.includes('z'),
+        icon: '💤'
+    },
+    {
+        id: 'unlock_m',
+        name: 'Keyboard Master',
+        desc: 'Unlock the M key (Full Keyboard Unlocked).',
+        condition: (game) => game.state.unlockedKeys.includes('m'),
+        icon: '🎹'
     }
 ];
 
