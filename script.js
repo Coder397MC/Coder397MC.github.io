@@ -577,6 +577,11 @@ function init() {
     ui.btnReaction.addEventListener('click', () => {
         try { minigameSystem.startMinigame('reaction'); } catch (e) { console.error(e); }
     });
+
+    document.getElementById('manual-save-btn').addEventListener('click', () => {
+        game.save();
+        showSaveNotification();
+    });
 }
 
 function renderSaveSlots() {
@@ -653,8 +658,39 @@ function startGame(slotId) {
     lastTime = performance.now();
     gameLoopId = requestAnimationFrame(gameLoop);
 
-    // Auto-save every 30s
-    setInterval(() => game.save(), 30000);
+    // Auto-save every 10s
+    setInterval(() => {
+        game.save();
+        showSaveNotification();
+    }, 10000);
+
+    // Save on close/hide
+    window.addEventListener('beforeunload', () => game.save());
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') game.save();
+    });
+}
+
+function showSaveNotification() {
+    const el = document.createElement('div');
+    el.innerText = 'Game Saved';
+    el.style.position = 'fixed';
+    el.style.bottom = '20px';
+    el.style.left = '20px';
+    el.style.background = 'rgba(56, 189, 248, 0.8)';
+    el.style.color = 'white';
+    el.style.padding = '5px 10px';
+    el.style.borderRadius = '5px';
+    el.style.zIndex = '1000';
+    el.style.transition = 'opacity 0.5s';
+    el.style.opacity = '1';
+    el.style.pointerEvents = 'none'; // Click through
+    document.body.appendChild(el);
+
+    setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 500);
+    }, 2000);
 }
 
 function gameLoop(timestamp) {
