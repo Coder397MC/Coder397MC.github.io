@@ -39,14 +39,19 @@
                     <span class="label">Local Network</span>
                     <span id="local-online" class="value" style="color:var(--text-main)">1</span>
                 </div>
-                <button id="manual-save-btn" class="challenge-btn" style="margin:0; padding: 0.5rem 1.5rem; font-size: 0.8rem; background: var(--bg-color); border: 1px solid var(--accent-color);">SAVE</button>
             </div>
         </header>
 
         <main>
             <div id="left-panel">
                 <div class="panel upgrades-panel">
-                    <h2>Upgrades</h2>
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; padding-bottom: 0.5rem;">
+                        <h2 style="border:none; margin:0; padding:0;">Upgrades</h2>
+                        <button id="view-upgrades-btn"
+                            style="background:transparent; border:1px solid var(--border-color); color:var(--text-muted); cursor:pointer; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem;">View
+                            All</button>
+                    </div>
                     <div id="upgrades-list" class="scroll-list">
                         <!-- Upgrades populated via JS -->
                     </div>
@@ -83,7 +88,13 @@
 
             <div id="right-panel">
                 <div class="panel achievements-panel">
-                    <h2>Achievements</h2>
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; padding-bottom: 0.5rem;">
+                        <h2 style="border:none; margin:0; padding:0;">Achievements</h2>
+                        <button id="view-achievements-btn"
+                            style="background:transparent; border:1px solid var(--border-color); color:var(--text-muted); cursor:pointer; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem;">View
+                            All</button>
+                    </div>
                     <div id="achievements-list" class="scroll-list">
                         <!-- Achievements populated via JS -->
                     </div>
@@ -105,6 +116,38 @@
                 <div id="minigame-score">Score: 0</div>
                 <button id="start-minigame-btn">Start</button>
                 <div id="minigame-play-area"></div>
+            </div>
+        </div>
+
+        <!-- Achievement Catalog Modal -->
+        <div id="achievement-catalog-overlay" class="hidden">
+            <div class="catalog-content">
+                <div class="catalog-header">
+                    <h2>Achievement Catalog</h2>
+                    <button id="close-catalog-btn">×</button>
+                </div>
+                <div class="catalog-stats">
+                    <span>Unlocked: <b id="catalog-unlocked-count">0/0</b></span>
+                    <div class="progress-bar-bg">
+                        <div id="catalog-progress-bar" class="progress-bar-fill"></div>
+                    </div>
+                </div>
+                <div id="catalog-grid" class="catalog-grid">
+                    <!-- Grid items populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Upgrade Catalog Modal -->
+        <div id="upgrade-catalog-overlay" class="hidden">
+            <div class="catalog-content">
+                <div class="catalog-header">
+                    <h2>Upgrade Catalog</h2>
+                    <button id="close-upgrade-catalog-btn">×</button>
+                </div>
+                <div id="upgrade-catalog-grid" class="catalog-grid">
+                    <!-- Grid items populated by JS -->
+                </div>
             </div>
         </div>
 

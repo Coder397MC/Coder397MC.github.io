@@ -24,6 +24,16 @@ const UPGRADES = [
         costFactor: 1.2
     },
     {
+        id: 'wrist_rest',
+        name: 'Ergonomic Wrist Rest',
+        baseCost: 350,
+        multiplier: 0,
+        bonus: 3,
+        desc: '+3 Press per key',
+        type: 'click',
+        costFactor: 1.4
+    },
+    {
         id: 'rgb_lighting',
         name: 'RGB Lighting',
         baseCost: 500,
@@ -42,6 +52,16 @@ const UPGRADES = [
         desc: '+5 Presses per second',
         type: 'auto',
         costFactor: 1.3
+    },
+    {
+        id: 'lubed_switches',
+        name: 'Lubed Switches',
+        baseCost: 3000,
+        multiplier: 1.15,
+        bonus: 0,
+        desc: 'x1.15 Global Multiplier',
+        type: 'global_mult',
+        costFactor: 2.5
     },
     {
         id: 'golden_caps',
@@ -64,6 +84,16 @@ const UPGRADES = [
         costFactor: 1.5
     },
     {
+        id: 'ai_assistant',
+        name: 'AI Co-Pilot',
+        baseCost: 60000,
+        multiplier: 0,
+        bonus: 150,
+        desc: '+150 Presses per second',
+        type: 'auto',
+        costFactor: 1.6
+    },
+    {
         id: 'quantum_keyboard',
         name: 'Quantum Keyboard',
         baseCost: 100000,
@@ -72,6 +102,16 @@ const UPGRADES = [
         desc: 'Doubles all production',
         type: 'global_mult',
         costFactor: 5.0
+    },
+    {
+        id: 'neural_link',
+        name: 'Neural Link',
+        baseCost: 1000000,
+        multiplier: 3.0,
+        bonus: 0,
+        desc: 'Triples all production',
+        type: 'global_mult',
+        costFactor: 10.0
     }
 ];
 
@@ -145,6 +185,27 @@ const ACHIEVEMENTS = [
         desc: 'Unlock the M key (Full Keyboard Unlocked).',
         condition: (game) => game.state.unlockedKeys.includes('m'),
         icon: '🎹'
+    },
+    {
+        id: 'unlock_f',
+        name: 'Respect Paid',
+        desc: 'Unlock the F key.',
+        condition: (game) => game.state.unlockedKeys.includes('f'),
+        icon: '🫡'
+    },
+    {
+        id: 'unlock_vowels',
+        name: 'Vowel Team',
+        desc: 'Unlock all vowels (A, E, I, O, U).',
+        condition: (game) => ['a', 'e', 'i', 'o', 'u'].every(k => game.state.unlockedKeys.includes(k)),
+        icon: '🗣️'
+    },
+    {
+        id: 'unlock_x',
+        name: 'X Marks the Spot',
+        desc: 'Unlock the X key.',
+        condition: (game) => game.state.unlockedKeys.includes('x'),
+        icon: '❌'
     }
 ];
 
@@ -179,7 +240,8 @@ class Game {
             startTime: Date.now(),
             upgradesOwned: UPGRADES.map(u => ({ id: u.id, count: 0 })),
             achievementsUnlocked: [],
-            unlockedKeys: [' ', 'w', 'a', 's', 'd']
+            unlockedKeys: [' ', 'w', 'a', 's', 'd'],
+            slotName: 'My Save'
         };
         this.stats = {
             totalPresses: 0,
@@ -310,6 +372,21 @@ class Game {
         }));
     }
 
+    renameSlot(slotId, newName) {
+        const saved = localStorage.getItem(`kb_master_save_${slotId}`);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            parsed.state.slotName = newName;
+            localStorage.setItem(`kb_master_save_${slotId}`, JSON.stringify(parsed));
+
+            if (this.currentSlot === slotId) {
+                this.state.slotName = newName;
+            }
+            return true;
+        }
+        return false;
+    }
+
     deleteSlot(slotId) {
         localStorage.removeItem(`kb_master_save_${slotId}`);
         // Legacy cleanup if deleting slot 1
@@ -332,20 +409,32 @@ class Game {
                     ...this.state,
                     ...parsed.state,
                     manualPresses: parsed.state.manualPresses || 0,
-                    unlockedKeys: parsed.state.unlockedKeys || [' ', 'w', 'a', 's', 'd']
+                    unlockedKeys: parsed.state.unlockedKeys || [' ', 'w', 'a', 's', 'd'],
+                    slotName: parsed.state.slotName || `Save Slot ${slotId}`
                 };
+
+                // Sync Upgrades (Fix for new content)
+                const savedUpgradesMap = new Map(this.state.upgradesOwned.map(u => [u.id, u.count]));
+                this.state.upgradesOwned = UPGRADES.map(u => ({
+                    id: u.id,
+                    count: savedUpgradesMap.get(u.id) || 0
+                }));
+
                 this.stats = { ...this.stats, ...parsed.stats };
                 this.recalcStats();
-                return true; // Loaded successfully
+                return 'LOADED';
             } catch (e) {
                 console.error('Save file corrupted', e);
-                return false;
+                localStorage.setItem(`kb_master_save_${slotId}_corrupt_${Date.now()}`, saved);
+                return 'CORRUPTED';
             }
         } else {
             // New Game
             this.resetState();
+            // Default name for new game in this slot
+            this.state.slotName = `Save Slot ${slotId}`;
             this.recalcStats();
-            return false; // New game started
+            return 'NEW_GAME';
         }
     }
 
@@ -355,9 +444,12 @@ class Game {
             const legacy = JSON.parse(localStorage.getItem('kb_master_save'));
             return {
                 exists: true,
-                presses: legacy.stats ? legacy.stats.totalPresses : 0,
+                presses: legacy.stats ? legacy.stats.totalPresses : 0, // This was lifetime
+                currentPresses: legacy.state ? legacy.state.presses : 0,
+                lifetime: legacy.stats ? legacy.stats.totalPresses : 0,
                 keys: legacy.state ? (legacy.state.unlockedKeys || []).length : 5,
-                timestamp: Date.now() // Unknown really
+                timestamp: Date.now(),
+                name: legacy.state ? (legacy.state.slotName || `Save Slot ${slotId}`) : `Save Slot ${slotId}`
             };
         }
 
@@ -368,8 +460,11 @@ class Game {
                 return {
                     exists: true,
                     presses: parsed.stats.totalPresses,
+                    currentPresses: parsed.state.presses,
+                    lifetime: parsed.stats.totalPresses,
                     keys: parsed.state.unlockedKeys.length,
-                    timestamp: parsed.lastSaved || Date.now()
+                    timestamp: parsed.lastSaved || Date.now(),
+                    name: parsed.state.slotName || `Save Slot ${slotId}`
                 };
             } catch (e) { return { exists: false }; }
         }
@@ -555,7 +650,21 @@ const ui = {
     cornerProgress: document.getElementById('corner-progress'),
     cornerRemaining: document.getElementById('corner-remaining'),
     saveSlotOverlay: document.getElementById('save-slot-overlay'),
-    saveSlotsContainer: document.getElementById('save-slots-container')
+    saveSlotsContainer: document.getElementById('save-slots-container'),
+
+    // Catalog UI
+    catalogOverlay: document.getElementById('achievement-catalog-overlay'),
+    catalogGrid: document.getElementById('catalog-grid'),
+    catalogUnlockedCount: document.getElementById('catalog-unlocked-count'),
+    catalogProgressBar: document.getElementById('catalog-progress-bar'),
+    viewAchievementsBtn: document.getElementById('view-achievements-btn'),
+    closeCatalogBtn: document.getElementById('close-catalog-btn'),
+
+    // Upgrade Catalog UI
+    upgradeCatalogOverlay: document.getElementById('upgrade-catalog-overlay'),
+    upgradeCatalogGrid: document.getElementById('upgrade-catalog-grid'),
+    viewUpgradesBtn: document.getElementById('view-upgrades-btn'),
+    closeUpgradeCatalogBtn: document.getElementById('close-upgrade-catalog-btn')
 };
 
 let lastTime = 0;
@@ -578,9 +687,24 @@ function init() {
         try { minigameSystem.startMinigame('reaction'); } catch (e) { console.error(e); }
     });
 
-    document.getElementById('manual-save-btn').addEventListener('click', () => {
-        game.save();
-        showSaveNotification();
+    // Catalog Listeners
+    ui.viewAchievementsBtn.addEventListener('click', () => {
+        renderAchievementCatalog();
+        ui.catalogOverlay.classList.remove('hidden');
+    });
+
+    ui.closeCatalogBtn.addEventListener('click', () => {
+        ui.catalogOverlay.classList.add('hidden');
+    });
+
+    // Upgrade Catalog Listeners
+    ui.viewUpgradesBtn.addEventListener('click', () => {
+        renderUpgradeCatalog();
+        ui.upgradeCatalogOverlay.classList.remove('hidden');
+    });
+
+    ui.closeUpgradeCatalogBtn.addEventListener('click', () => {
+        ui.upgradeCatalogOverlay.classList.add('hidden');
     });
 }
 
@@ -594,11 +718,17 @@ function renderSaveSlots() {
         let content = '';
         if (meta.exists) {
             const date = new Date(meta.timestamp).toLocaleDateString();
+            const displayName = meta.name || `Save Slot ${i}`;
+            // Show both Current (for spendable) and Lifetime (for score)
             content = `
                 <div class="slot-info" style="flex:1">
-                    <h3>Save Slot ${i}</h3>
-                    <div class="slot-meta">Total Presses: ${Math.floor(meta.presses).toLocaleString()}</div>
-                    <div class="slot-meta">Keys: ${meta.keys} | Saved: ${date}</div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <h3 class="slot-name-display" data-slot="${i}">${displayName}</h3>
+                        <button class="edit-btn" data-slot="${i}" style="background:transparent; border:none; cursor:pointer; font-size:0.9rem; opacity:0.5;">✏️</button>
+                    </div>
+                    <div class="slot-meta" style="color:var(--accent-color)">Presses: ${Math.floor(meta.currentPresses).toLocaleString()}</div>
+                    <div class="slot-meta" style="font-size:0.75rem">Lifetime: ${Math.floor(meta.lifetime).toLocaleString()} | Keys: ${meta.keys}</div>
+                    <div class="slot-meta">Last Saved: ${date}</div>
                 </div>
                 <div style="display:flex; align-items:center; gap:15px;">
                     <div class="slot-action">LOAD</div>
@@ -608,8 +738,8 @@ function renderSaveSlots() {
         } else {
             content = `
                 <div class="slot-info">
-                    <h3>Save Slot ${i}</h3>
-                    <div class="slot-meta">Empty Slot</div>
+                    <h3>Empty Slot ${i}</h3>
+                    <div class="slot-meta">Start a new journey</div>
                 </div>
                 <div class="slot-action" style="color:var(--text-muted)">NEW GAME</div>
             `;
@@ -619,8 +749,8 @@ function renderSaveSlots() {
 
         // Click on slot to load/start
         el.onclick = (e) => {
-            // If clicked delete button, don't start
-            if (e.target.closest('.delete-btn')) return;
+            // If clicked interactive buttons, don't start
+            if (e.target.closest('.delete-btn') || e.target.closest('.edit-btn')) return;
             startGame(i);
         };
 
@@ -630,14 +760,35 @@ function renderSaveSlots() {
             delBtn.onmouseover = () => delBtn.style.opacity = '1';
             delBtn.onmouseout = () => delBtn.style.opacity = '0.5';
             delBtn.onclick = (e) => {
-                e.stopPropagation(); // Stop bubbling to el.onclick
+                e.stopPropagation();
                 deleteSave(i);
+            };
+        }
+
+        // Add Rename Handler
+        const editBtn = el.querySelector('.edit-btn');
+        if (editBtn) {
+            editBtn.onmouseover = () => editBtn.style.opacity = '1';
+            editBtn.onmouseout = () => editBtn.style.opacity = '0.5';
+            editBtn.onclick = (e) => {
+                e.stopPropagation();
+                renameSave(i);
             };
         }
 
         ui.saveSlotsContainer.appendChild(el);
     }
     ui.saveSlotOverlay.classList.remove('hidden');
+}
+
+function renameSave(slotId) {
+    const meta = game.getSlotMeta(slotId);
+    const newName = prompt("Enter a name for this save slot:", meta.name || `Save Slot ${slotId}`);
+    if (newName && newName.trim() !== "") {
+        if (game.renameSlot(slotId, newName.trim())) {
+            renderSaveSlots();
+        }
+    }
 }
 
 function deleteSave(slotId) {
@@ -648,49 +799,36 @@ function deleteSave(slotId) {
 }
 
 function startGame(slotId) {
-    const isLoad = game.loadSlot(slotId);
-    console.log(`Starting Slot ${slotId} (${isLoad ? 'Loaded' : 'New Game'})`);
+    const status = game.loadSlot(slotId);
+    console.log(`Starting Slot ${slotId} (${status})`);
+
+    if (status === 'CORRUPTED') {
+        alert("This save file was corrupted. A backup has been created, and a new game has been started in this slot.");
+        // We still start new game effectively, but user is warned. The corrupted data was backed up in loadSlot.
+        game.resetState();
+        game.state.slotName = `Save Slot ${slotId}`;
+        game.recalcStats();
+    }
 
     ui.saveSlotOverlay.classList.add('hidden');
     updateUI();
 
     // Start Loop
     lastTime = performance.now();
+    if (gameLoopId) cancelAnimationFrame(gameLoopId);
     gameLoopId = requestAnimationFrame(gameLoop);
 
-    // Auto-save every 10s
+    // Auto-save every 1s
     setInterval(() => {
         game.save();
-        showSaveNotification();
-    }, 10000);
+    }, 1000);
 
-    // Save on close/hide
+    // Save on close/hide/refresh - Improved Reliability
     window.addEventListener('beforeunload', () => game.save());
+    window.addEventListener('pagehide', () => game.save());
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') game.save();
     });
-}
-
-function showSaveNotification() {
-    const el = document.createElement('div');
-    el.innerText = 'Game Saved';
-    el.style.position = 'fixed';
-    el.style.bottom = '20px';
-    el.style.left = '20px';
-    el.style.background = 'rgba(56, 189, 248, 0.8)';
-    el.style.color = 'white';
-    el.style.padding = '5px 10px';
-    el.style.borderRadius = '5px';
-    el.style.zIndex = '1000';
-    el.style.transition = 'opacity 0.5s';
-    el.style.opacity = '1';
-    el.style.pointerEvents = 'none'; // Click through
-    document.body.appendChild(el);
-
-    setTimeout(() => {
-        el.style.opacity = '0';
-        setTimeout(() => el.remove(), 500);
-    }, 2000);
 }
 
 function gameLoop(timestamp) {
@@ -713,23 +851,41 @@ function updateUI() {
     ui.pps.innerText = game.stats.currentPPS.toFixed(1);
 
     // Update Keys Unlocked display with progress
-    const nextUnlockIndex = game.state.unlockedKeys.length - 5;
-    const nextMilestone = (nextUnlockIndex + 1) * 1000;
+    // Unlocking logic based on MANUAL PRESSES
+    // Keys start with 5. Next unlock at 1000 manual presses, then every 1000.
+    const keysUnlockedCount = game.state.unlockedKeys.length;
+    const progressIndex = Math.max(0, keysUnlockedCount - 5);
+    const nextMilestone = (progressIndex + 1) * 1000;
 
-    // If we have keys to unlock
-    if (nextUnlockIndex < UNLOCK_ORDER.length) {
-        ui.keysUnlocked.innerHTML = `${game.state.unlockedKeys.length} <span style="font-size:0.6em; color:var(--text-muted)">(${game.state.manualPresses}/${nextMilestone})</span>`;
+    // Check if max
+    if (progressIndex < UNLOCK_ORDER.length) {
+        ui.keysUnlocked.innerHTML = `${keysUnlockedCount} <span style="font-size:0.6em; color:var(--text-muted)">(${game.state.manualPresses}/${nextMilestone})</span>`;
     } else {
-        ui.keysUnlocked.innerHTML = `${game.state.unlockedKeys.length} <span style="font-size:0.6em; color:var(--accent-color)">(MAX)</span>`;
+        ui.keysUnlocked.innerHTML = `${keysUnlockedCount} <span style="font-size:0.6em; color:var(--accent-color)">(MAX)</span>`;
+    }
+
+    // Safety check for keys
+    if (!game.state.unlockedKeys || game.state.unlockedKeys.length === 0) {
+        console.warn("Keys list was empty, resetting to default.");
+        game.state.unlockedKeys = [' ', 'w', 'a', 's', 'd'];
     }
 
     if (ui.activeKeysList) {
-        ui.activeKeysList.innerText = "Active Keys: " + game.state.unlockedKeys.map(k => k === ' ' ? 'Space' : k.toUpperCase()).join(', ');
+        // Limit list length for UI cleanlyness
+        const keys = game.state.unlockedKeys.map(k => k === ' ' ? 'Space' : k.toUpperCase());
+        ui.activeKeysList.innerHTML = `<span style="color:var(--text-muted)">Active Keys:</span> <span style="color:var(--accent-color); font-weight:bold">${keys.join(', ')}</span>`;
+        ui.activeKeysList.style.display = 'block';
+        ui.activeKeysList.style.visibility = 'visible';
+        ui.activeKeysList.style.opacity = '1';
     }
 
+    // Update target key name in instructions
+    const targetKeyName = document.getElementById('target-key-name');
+    if (targetKeyName) {
+        targetKeyName.innerText = game.state.unlockedKeys.length > 5 ? "ANY UNLOCKED KEY" : "SPACE";
+    }
 
     // Update upgrade buttons (expensive to do every frame, maybe throttle?)
-    // For now just do it every 10 frames or so if performance lags
     updateUpgradeAvailability();
     updateChallengeButton();
     updateCornerCounter();
@@ -738,12 +894,15 @@ function updateUI() {
 function updateCornerCounter() {
     if (!ui.cornerProgress) return;
 
-    const nextUnlockIndex = game.state.unlockedKeys.length - 5;
-    const nextMilestone = (nextUnlockIndex + 1) * 1000;
+    const keysUnlockedCount = game.state.unlockedKeys.length;
+    const progressIndex = Math.max(0, keysUnlockedCount - 5);
+    const nextMilestone = (progressIndex + 1) * 1000;
 
-    if (nextUnlockIndex < UNLOCK_ORDER.length) {
+    if (progressIndex < UNLOCK_ORDER.length) {
+        // Correct logic: we need 'nextMilestone' TOTAL manual presses to unlock.
+        // Current manual presses are game.state.manualPresses.
         ui.cornerProgress.innerHTML = `<span style="color:white">${game.state.manualPresses}</span> / ${nextMilestone}`;
-        ui.cornerRemaining.innerText = `${nextMilestone - game.state.manualPresses} clicks to go!`;
+        ui.cornerRemaining.innerText = `${Math.max(0, nextMilestone - game.state.manualPresses)} clicks to go!`;
     } else {
         ui.cornerProgress.innerText = "ALL UNLOCKED";
         ui.cornerRemaining.innerText = "You are a Keyboard Master!";
@@ -954,6 +1113,58 @@ function renderLeaderboard() {
       <span style="color:var(--accent-color)">${entry.score.toLocaleString()}</span>
     </div>
   `).join('');
+}
+
+function renderAchievementCatalog() {
+    const unlockedCount = game.state.achievementsUnlocked.length;
+    const totalCount = ACHIEVEMENTS.length;
+    const progressPercent = (unlockedCount / totalCount) * 100;
+
+    ui.catalogUnlockedCount.innerText = `${unlockedCount}/${totalCount}`;
+    ui.catalogProgressBar.style.width = `${progressPercent}%`;
+
+    ui.catalogGrid.innerHTML = ACHIEVEMENTS.map(a => {
+        const isUnlocked = game.state.achievementsUnlocked.includes(a.id);
+        const className = isUnlocked ? 'catalog-item unlocked' : 'catalog-item';
+        const icon = a.icon; // Always show icon, greyscale handles "unknown" feel
+        // Or if you want to hide locked icons: const icon = isUnlocked ? a.icon : '?'; 
+
+        return `
+            <div class="${className}">
+                <div class="catalog-icon">${icon}</div>
+                <div class="catalog-info">
+                    <h3>${a.name}</h3>
+                    <p>${a.desc}</p>
+                </div>
+                ${isUnlocked ? '<div style="margin-top:10px; font-size:0.8rem; color:#4ade80;">✔ Unlocked</div>' : '<div style="margin-top:10px; font-size:0.8rem; color:var(--text-muted);">🔒 Locked</div>'}
+            </div>
+        `;
+    }).join('');
+}
+
+function renderUpgradeCatalog() {
+    ui.upgradeCatalogGrid.innerHTML = UPGRADES.map(u => {
+        const owned = game.state.upgradesOwned.find(own => own.id === u.id);
+        const count = owned ? owned.count : 0;
+        const isUnlocked = game.state.presses >= u.baseCost || count > 0; // Simple unlock logic or just show all?
+        // Let's show all but grey out if not affordable EVER (maybe?)
+        // For now, standardize style.
+
+        const nextCost = game.getUpgradeCost(u.id);
+        const canAfford = game.state.presses >= nextCost;
+
+        return `
+            <div class="catalog-item ${count > 0 ? 'unlocked' : ''}" style="opacity: 1; filter: none; border-color: ${count > 0 ? 'var(--accent-color)' : 'var(--border-color)'}">
+                <div class="catalog-info">
+                    <h3>${u.name}</h3>
+                    <p style="font-size:0.8rem; margin-bottom:0.5rem;">${u.desc}</p>
+                    <div style="font-size:0.9rem; color:var(--text-main); font-weight:bold;">Owned: ${count}</div>
+                    <div style="margin-top:0.5rem; color:${canAfford ? 'var(--accent-color)' : 'var(--text-muted)'}">Cost: ${nextCost}</div>
+                </div>
+                ${count > 0 ? '<div style="margin-top:10px; font-size:0.8rem; color:#4ade80;">✔ Active</div>' : ''}
+            </div>
+        `;
+    }).join('');
 }
 
 // Minigame UI Callback
