@@ -314,3 +314,38 @@ main {
 .challenge-btn { margin-top: 2rem; background: var(--secondary-color); color: white; border: none; padding: 1rem 2rem; font-size: 1.2rem; border-radius: 0.5rem; cursor: pointer; font-weight: 700; transition: all 0.2s; box-shadow: 0 0 20px rgba(236, 72, 153, 0.4); } .challenge-btn:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 0 30px rgba(236, 72, 153, 0.6); } .challenge-btn:disabled { opacity: 0.5; cursor: not-allowed; background: var(--text-muted); box-shadow: none; }
 .minigame-selector-panel { margin-top: 2rem; padding: 1rem; background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border-color); border-radius: 0.5rem; display: flex; flex-direction: column; align-items: center; } .minigame-selector-panel h3 { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1rem; color: var(--text-muted); } .challenge-btn { font-size: 0.9rem; padding: 0.75rem 1rem; margin-top: 0; }
 #corner-counter { position: fixed; bottom: 20px; right: 20px; background: var(--panel-bg); backdrop-filter: blur(10px); border: 1px solid var(--accent-color); padding: 1rem; border-radius: 0.5rem; box-shadow: 0 0 20px rgba(0,0,0,0.5); font-family: var(--font-family); z-index: 50; text-align: right; min-width: 150px; } #corner-counter .label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem; }
+
+/* Save Slot Overlay */
+#save-slot-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: var(--bg-color); /* Opaque background to hide game */
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#save-slot-overlay.hidden {
+  display: none;
+}
+
+.save-slot {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.save-slot:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: var(--accent-color);
+  transform: translateX(10px);
+}
+.slot-info h3 { font-size: 1.2rem; color: var(--text-main); margin-bottom: 0.25rem; }
+.slot-meta { font-size: 0.8rem; color: var(--text-muted); }
+.slot-action { font-size: 0.9rem; color: var(--accent-color); font-weight: bold; }
+

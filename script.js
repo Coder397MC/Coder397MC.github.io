@@ -163,27 +163,29 @@ const UNLOCK_ORDER = ['q', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'f', 'g', 'h'
 // ==========================================
 class Game {
     constructor() {
+        // Default state (will be overwritten by load or stay as is for new game)
+        this.resetState();
+        this.currentSlot = null;
+    }
+
+    resetState() {
         this.state = {
             presses: 0,
             lifetimePresses: 0,
-            manualPresses: 0, // Track human clicks
+            manualPresses: 0,
             pps: 0,
             clickValue: 1,
             multiplier: 1.0,
             startTime: Date.now(),
             upgradesOwned: UPGRADES.map(u => ({ id: u.id, count: 0 })),
             achievementsUnlocked: [],
-            unlockedKeys: [' ', 'w', 'a', 's', 'd'] // Strings, lowercase
+            unlockedKeys: [' ', 'w', 'a', 's', 'd']
         };
-
         this.stats = {
             totalPresses: 0,
             currentPPS: 0,
             maxPPS: 0
         };
-
-        // Load save if exists
-        this.load();
     }
 
     pressKey(amount) {
@@ -300,32 +302,78 @@ class Game {
     }
 
     save() {
-        localStorage.setItem('kb_master_save', JSON.stringify({
+        if (!this.currentSlot) return;
+        localStorage.setItem(`kb_master_save_${this.currentSlot}`, JSON.stringify({
             state: this.state,
-            stats: this.stats
+            stats: this.stats,
+            lastSaved: Date.now()
         }));
     }
 
-    load() {
-        const saved = localStorage.getItem('kb_master_save');
+    deleteSlot(slotId) {
+        localStorage.removeItem(`kb_master_save_${slotId}`);
+        // Legacy cleanup if deleting slot 1
+        if (slotId === 1) localStorage.removeItem('kb_master_save');
+    }
+
+    loadSlot(slotId) {
+        this.currentSlot = slotId;
+
+        // Migration check: if slot 1 is empty but legacy save exists
+        if (slotId === 1 && !localStorage.getItem('kb_master_save_1') && localStorage.getItem('kb_master_save')) {
+            localStorage.setItem('kb_master_save_1', localStorage.getItem('kb_master_save'));
+        }
+
+        const saved = localStorage.getItem(`kb_master_save_${slotId}`);
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
-                // Merge to avoid breaking if data structure changes slightly
-
                 this.state = {
                     ...this.state,
                     ...parsed.state,
-                    // Ensure new properties are initialized if loading old save
                     manualPresses: parsed.state.manualPresses || 0,
                     unlockedKeys: parsed.state.unlockedKeys || [' ', 'w', 'a', 's', 'd']
                 };
                 this.stats = { ...this.stats, ...parsed.stats };
                 this.recalcStats();
+                return true; // Loaded successfully
             } catch (e) {
                 console.error('Save file corrupted', e);
+                return false;
             }
+        } else {
+            // New Game
+            this.resetState();
+            this.recalcStats();
+            return false; // New game started
         }
+    }
+
+    getSlotMeta(slotId) {
+        // Migration check for meta read
+        if (slotId === 1 && !localStorage.getItem('kb_master_save_1') && localStorage.getItem('kb_master_save')) {
+            const legacy = JSON.parse(localStorage.getItem('kb_master_save'));
+            return {
+                exists: true,
+                presses: legacy.stats ? legacy.stats.totalPresses : 0,
+                keys: legacy.state ? (legacy.state.unlockedKeys || []).length : 5,
+                timestamp: Date.now() // Unknown really
+            };
+        }
+
+        const saved = localStorage.getItem(`kb_master_save_${slotId}`);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                return {
+                    exists: true,
+                    presses: parsed.stats.totalPresses,
+                    keys: parsed.state.unlockedKeys.length,
+                    timestamp: parsed.lastSaved || Date.now()
+                };
+            } catch (e) { return { exists: false }; }
+        }
+        return { exists: false };
     }
 
     reset() {
@@ -506,10 +554,12 @@ const ui = {
     activeKeysList: document.getElementById('active-keys-list'),
     cornerProgress: document.getElementById('corner-progress'),
     cornerRemaining: document.getElementById('corner-remaining'),
-    modal: null // For minigame popup
+    saveSlotOverlay: document.getElementById('save-slot-overlay'),
+    saveSlotsContainer: document.getElementById('save-slots-container')
 };
 
 let lastTime = 0;
+let gameLoopId;
 
 function init() {
     console.log('Initializing Keyboard Master...');
@@ -517,8 +567,8 @@ function init() {
     renderAchievements();
     renderLeaderboard();
 
-    // Load saved state
-    updateUI();
+    // Show Save Slot Selection
+    renderSaveSlots();
 
     ui.btnSpeed.addEventListener('click', () => {
         try { minigameSystem.startMinigame('speed'); } catch (e) { console.error(e); }
@@ -527,9 +577,81 @@ function init() {
     ui.btnReaction.addEventListener('click', () => {
         try { minigameSystem.startMinigame('reaction'); } catch (e) { console.error(e); }
     });
+}
+
+function renderSaveSlots() {
+    ui.saveSlotsContainer.innerHTML = '';
+    for (let i = 1; i <= 3; i++) {
+        const meta = game.getSlotMeta(i);
+        const el = document.createElement('div');
+        el.className = 'save-slot';
+
+        let content = '';
+        if (meta.exists) {
+            const date = new Date(meta.timestamp).toLocaleDateString();
+            content = `
+                <div class="slot-info" style="flex:1">
+                    <h3>Save Slot ${i}</h3>
+                    <div class="slot-meta">Total Presses: ${Math.floor(meta.presses).toLocaleString()}</div>
+                    <div class="slot-meta">Keys: ${meta.keys} | Saved: ${date}</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div class="slot-action">LOAD</div>
+                    <button class="delete-btn" data-slot="${i}" style="background:transparent; border:none; cursor:pointer; font-size:1.2rem; opacity:0.5; transition:opacity 0.2s;">🗑️</button>
+                </div>
+            `;
+        } else {
+            content = `
+                <div class="slot-info">
+                    <h3>Save Slot ${i}</h3>
+                    <div class="slot-meta">Empty Slot</div>
+                </div>
+                <div class="slot-action" style="color:var(--text-muted)">NEW GAME</div>
+            `;
+        }
+
+        el.innerHTML = content;
+
+        // Click on slot to load/start
+        el.onclick = (e) => {
+            // If clicked delete button, don't start
+            if (e.target.closest('.delete-btn')) return;
+            startGame(i);
+        };
+
+        // Add Delete Handler
+        const delBtn = el.querySelector('.delete-btn');
+        if (delBtn) {
+            delBtn.onmouseover = () => delBtn.style.opacity = '1';
+            delBtn.onmouseout = () => delBtn.style.opacity = '0.5';
+            delBtn.onclick = (e) => {
+                e.stopPropagation(); // Stop bubbling to el.onclick
+                deleteSave(i);
+            };
+        }
+
+        ui.saveSlotsContainer.appendChild(el);
+    }
+    ui.saveSlotOverlay.classList.remove('hidden');
+}
+
+function deleteSave(slotId) {
+    if (confirm(`Are you sure you want to delete Save Slot ${slotId}? This cannot be undone.`)) {
+        game.deleteSlot(slotId);
+        renderSaveSlots();
+    }
+}
+
+function startGame(slotId) {
+    const isLoad = game.loadSlot(slotId);
+    console.log(`Starting Slot ${slotId} (${isLoad ? 'Loaded' : 'New Game'})`);
+
+    ui.saveSlotOverlay.classList.add('hidden');
+    updateUI();
 
     // Start Loop
-    requestAnimationFrame(gameLoop);
+    lastTime = performance.now();
+    gameLoopId = requestAnimationFrame(gameLoop);
 
     // Auto-save every 30s
     setInterval(() => game.save(), 30000);
@@ -626,7 +748,10 @@ function updateUpgradeAvailability() {
 
 // Input Handling
 document.addEventListener('keydown', (e) => {
-    if (e.repeat) return; // Prevent holding down key spamming too easily? Maybe allow it for auto-clickers later.
+    if (e.repeat) return;
+
+    // Block input if save overlay is visible
+    if (!ui.saveSlotOverlay.classList.contains('hidden')) return;
 
     const key = e.key;
     console.log('Key pressed:', key); // Debugging
