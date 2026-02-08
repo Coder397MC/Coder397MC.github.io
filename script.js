@@ -870,14 +870,26 @@ function updateUI() {
         game.state.unlockedKeys = [' ', 'w', 'a', 's', 'd'];
     }
 
-    if (ui.activeKeysList) {
-        // Limit list length for UI cleanlyness
-        const keys = game.state.unlockedKeys.map(k => k === ' ' ? 'Space' : k.toUpperCase());
-        ui.activeKeysList.innerHTML = `<span style="color:var(--text-muted)">Active Keys:</span> <span style="color:var(--accent-color); font-weight:bold">${keys.join(', ')}</span>`;
-        ui.activeKeysList.style.display = 'block';
-        ui.activeKeysList.style.visibility = 'visible';
-        ui.activeKeysList.style.opacity = '1';
+    // Forced Active Keys Display (Dynamic Check)
+    let activeKeysEl = document.getElementById('active-keys-list');
+    if (!activeKeysEl) {
+        // Element missing? Create it!
+        console.log("Re-creating missing active keys list");
+        activeKeysEl = document.createElement('div');
+        activeKeysEl.id = 'active-keys-list';
+        const instruction = document.querySelector('.instruction');
+        if (instruction) {
+            instruction.parentNode.insertBefore(activeKeysEl, instruction.nextSibling);
+        } else {
+            document.getElementById('center-panel').appendChild(activeKeysEl);
+        }
     }
+
+    const keys = game.state.unlockedKeys.map(k => k === ' ' ? 'Space' : k.toUpperCase());
+    activeKeysEl.innerHTML = `<div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:5px">Active Keys</div><div style="font-size:1.1rem; color:var(--accent-color); font-weight:bold">${keys.join(', ')}</div>`;
+    activeKeysEl.style.display = 'block';
+    activeKeysEl.style.marginTop = '1rem';
+    activeKeysEl.style.textAlign = 'center';
 
     // Update target key name in instructions
     const targetKeyName = document.getElementById('target-key-name');

@@ -222,15 +222,19 @@ main {
   justify-content: center;
   align-items: center;
   position: relative;
+  padding-top: 0;
+  /* remove any default padding */
 }
 
 #key-display {
   position: relative;
   width: 100%;
-  height: 300px;
+  height: 200px;
+  /* Reduced from 300px */
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 0;
 }
 
 .massive-key {
@@ -258,7 +262,8 @@ main {
 }
 
 .instruction {
-  margin-top: 2rem;
+  margin-top: 0.5rem;
+  /* Reduced from 2rem */
   color: var(--text-main);
   font-size: 1.2rem;
   animation: pulse 2s infinite;
@@ -266,6 +271,7 @@ main {
 }
 
 #active-keys-list {
+  display: block !important;
   margin-top: 0.5rem;
   color: var(--accent-color);
   font-size: 1rem;
