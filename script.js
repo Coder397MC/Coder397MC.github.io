@@ -1158,9 +1158,6 @@ function renderUpgradeCatalog() {
     ui.upgradeCatalogGrid.innerHTML = UPGRADES.map(u => {
         const owned = game.state.upgradesOwned.find(own => own.id === u.id);
         const count = owned ? owned.count : 0;
-        const isUnlocked = game.state.presses >= u.baseCost || count > 0; // Simple unlock logic or just show all?
-        // Let's show all but grey out if not affordable EVER (maybe?)
-        // For now, standardize style.
 
         const nextCost = game.getUpgradeCost(u.id);
         const canAfford = game.state.presses >= nextCost;
@@ -1169,14 +1166,45 @@ function renderUpgradeCatalog() {
             <div class="catalog-item ${count > 0 ? 'unlocked' : ''}" style="opacity: 1; filter: none; border-color: ${count > 0 ? 'var(--accent-color)' : 'var(--border-color)'}">
                 <div class="catalog-info">
                     <h3>${u.name}</h3>
-                    <p style="font-size:0.8rem; margin-bottom:0.5rem;">${u.desc}</p>
+                    <p style="font-size:0.8rem; margin-bottom:0.5rem; height:40px; overflow:hidden;">${u.desc}</p>
                     <div style="font-size:0.9rem; color:var(--text-main); font-weight:bold;">Owned: ${count}</div>
-                    <div style="margin-top:0.5rem; color:${canAfford ? 'var(--accent-color)' : 'var(--text-muted)'}">Cost: ${nextCost}</div>
+                    <div style="margin-top:0.2rem; color:${canAfford ? 'var(--accent-color)' : 'var(--text-muted)'}">Cost: ${Math.floor(nextCost).toLocaleString()}</div>
                 </div>
-                ${count > 0 ? '<div style="margin-top:10px; font-size:0.8rem; color:#4ade80;">✔ Active</div>' : ''}
+                <button 
+                    onclick="buyUpgradeFromCatalog('${u.id}')"
+                    style="
+                        margin-top: 10px;
+                        background: ${canAfford ? 'var(--accent-color)' : '#334155'};
+                        color: ${canAfford ? '#0f172a' : '#94a3b8'};
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 6px;
+                        cursor: ${canAfford ? 'pointer' : 'not-allowed'};
+                        font-weight: 700;
+                        width: 100%;
+                        transition: transform 0.1s;
+                    "
+                    ${canAfford ? '' : 'disabled'}
+                    onmouseover="this.style.transform='scale(1.05)'"
+                    onmouseout="this.style.transform='scale(1)'"
+                >
+                    ${canAfford ? 'BUY' : 'LOCKED'}
+                </button>
             </div>
         `;
     }).join('');
+}
+
+function buyUpgradeFromCatalog(id) {
+    if (game.buyUpgrade(id)) {
+        // Success
+        renderUpgradeCatalog();
+        updateUI();
+        // Play sound or feedback?
+    } else {
+        // Failed
+        console.log("Cannot afford");
+    }
 }
 
 // Minigame UI Callback
