@@ -6,32 +6,32 @@ Think Cookie Clicker, but powered by your keyboard.
 
 🕹️ Gameplay Overview
 
-Press the active key(s) (starting with SPACE) to generate presses
+  Press the active key(s) (starting with SPACE) to generate presses
 
-Accumulate Total Presses and increase your Presses Per Second (PPS)
+  Accumulate Total Presses and increase your Presses Per Second (PPS)
 
-Unlock additional keys like W, A, S, D to expand gameplay
+  Unlock additional keys like W, A, S, D to expand gameplay
 
-Spend presses on upgrades that boost efficiency
+  Spend presses on upgrades that boost efficiency
 
-Complete achievements to track milestones
+  Complete achievements to track milestones
 
-Compete against others on the leaderboard
+  Compete against others on the leaderboard
 
-Test your speed and reaction time in minigames
+  Test your speed and reaction time in minigames
 
-Progress is persistent using save slots, so you can always come back and continue.
+  Progress is persistent using save slots, so you can always come back and continue.
 
 ⌨️ Core Mechanics
-Key Pressing
+  Key Pressing
 
-Each valid key press increases your total press count
+  Each valid key press increases your total press count
 
-PPS is calculated based on recent input speed
+  PPS is calculated based on recent input speed
 
-New keys unlock after reaching specific press milestones
+  New keys unlock after reaching specific press milestones
 
-Progress Tracking
+  Progress Tracking
 
 The top status bar displays:
 
