@@ -12,7 +12,7 @@ Think Cookie Clicker, but powered by your keyboard.
 
   Unlock additional keys like W, A, S, D to expand gameplay 
 
-  Spend presses on upgrades that boost efficiency
+  Spend presses on upgrades that boost efficiency!
 
   Complete achievements to track milestones
 
