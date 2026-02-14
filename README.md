@@ -10,7 +10,7 @@ Think Cookie Clicker, but powered by your keyboard.
 
   Accumulate Total Presses and increase your Presses Per Second (PPS) 
 
-  Unlock additional keys like W, A, S, D to expand gameplay 
+  Unlock additional keys like W, A, S, D to expand gameplay  
 
   Spend presses on upgrades that boost efficiency!
 
@@ -65,7 +65,7 @@ Earn achievements for milestones like:
 
 Total presses reached
 
-Keys unlocked
+Keys unlocked 
 
 Minigames completed
 
