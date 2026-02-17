@@ -518,9 +518,9 @@ button,
 }
 
 #save-slot-overlay {
-  background: var(--bg-dark);
+  background-color: #050505 !important;
   /* Solid background hiding everything */
-  z-index: 1000;
+  z-index: 10000 !important;
   /* Highest priority */
 }
 

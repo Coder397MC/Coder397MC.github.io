@@ -90,19 +90,7 @@
                         <!-- Achievements populated via JS -->
                     </div>
                 </div>
-                <div class="panel leaderboard-panel"
-                    style="margin-top: 1.5rem; height: calc(100% - 1.5rem - var(--panel-height));">
-                    <!-- Note: Adjusted margin/height logic might be needed if multiple panels -->
-                    <!-- Actually, grid layout handles height, but I'll leave the style attribute for specific spacing override if grid needs it -->
-                    <!-- Wait, I'll remove the style and let CSS grid handle it if possible, but the original HTML had two panels in one column. -->
-                    <!-- CSS Grid: main has 3 columns. left-panel and right-panel might contain multiple divs? -->
-                    <!-- Looking at original CSS: .panel had height 100%. If right-panel has 2 divs, they need to share height or be flex. -->
-                    <!-- Original HTML had 2 panels in right-panel. -->
-                    <!-- I'll wrap them in a flex container if needed, or just let them stack. Current CSS makes .panel height 100%. -->
-                    <!-- I should probably make .panel explicit height or flex-grow. -->
-                    <!-- I'll check my CSS for .panel. It says height: 100%. This is bad if there are 2 panels in one column. -->
-                    <!-- I will change the HTML structure of right-panel to be a flex column and panels to be flex-1. -->
-
+                <div class="panel leaderboard-panel">
                     <h2>Leaderboard</h2>
                     <div id="leaderboard-list" class="scroll-list">
                         <!-- Leaderboard entries -->
@@ -111,60 +99,6 @@
             </div>
         </main>
 
-        <div id="minigame-overlay" class="hidden">
-            <div class="minigame-content">
-                <h2 id="minigame-title">Speed Challenge</h2>
-                <p id="minigame-desc">Press as fast as you can!</p>
-                <div id="minigame-timer">Time: 10s</div>
-                <div id="minigame-score">Score: 0</div>
-                <button id="start-minigame-btn">Start</button>
-                <div id="minigame-play-area"></div>
-            </div>
-        </div>
-
-        <!-- Achievement Catalog Modal -->
-        <div id="achievement-catalog-overlay" class="hidden">
-            <div class="catalog-content">
-                <div class="catalog-header">
-                    <h2>Achievement Catalog</h2>
-                    <button id="close-catalog-btn">×</button>
-                </div>
-                <div class="catalog-stats">
-                    <span>Unlocked: <b id="catalog-unlocked-count">0/0</b></span>
-                    <div class="progress-bar-bg">
-                        <div id="catalog-progress-bar" class="progress-bar-fill"></div>
-                    </div>
-                </div>
-                <div id="catalog-grid" class="catalog-grid">
-                    <!-- Grid items populated by JS -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Upgrade Catalog Modal -->
-        <div id="upgrade-catalog-overlay" class="hidden">
-            <div class="catalog-content">
-                <div class="catalog-header">
-                    <h2>Upgrade Catalog</h2>
-                    <button id="close-upgrade-catalog-btn">×</button>
-                </div>
-                <div id="upgrade-catalog-grid" class="catalog-grid">
-                    <!-- Grid items populated by JS -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Save Slot Overlay -->
-        <div id="save-slot-overlay">
-            <div class="minigame-content" style="max-width: 800px;">
-                <h2>SELECT SAVE SLOT</h2>
-                <p style="color:var(--text-muted); margin-bottom:2rem;">Choose a slot to load or start a new game.</p>
-                <div id="save-slots-container" style="display:flex; flex-direction:column; gap:1rem;">
-                    <!-- Slots populated by JS -->
-                </div>
-            </div>
-        </div>
-
         <div id="corner-counter" class="corner-stat">
             <div class="label">Next Key Unlock</div>
             <div id="corner-progress" style="font-weight:bold; color:var(--accent)">0 / 1000</div>
@@ -172,8 +106,64 @@
         </div>
 
     </div>
+
+    <!-- OVERLAYS MOVED HERE (Outside game-container) -->
+
+    <div id="minigame-overlay" class="hidden">
+        <div class="minigame-content">
+            <h2 id="minigame-title">Speed Challenge</h2>
+            <p id="minigame-desc">Press as fast as you can!</p>
+            <div id="minigame-timer">Time: 10s</div>
+            <div id="minigame-score">Score: 0</div>
+            <button id="start-minigame-btn">Start</button>
+            <div id="minigame-play-area"></div>
+        </div>
+    </div>
+
+    <!-- Achievement Catalog Modal -->
+    <div id="achievement-catalog-overlay" class="hidden">
+        <div class="catalog-content">
+            <div class="catalog-header">
+                <h2>Achievement Catalog</h2>
+                <button id="close-catalog-btn">×</button>
+            </div>
+            <div class="catalog-stats">
+                <span>Unlocked: <b id="catalog-unlocked-count">0/0</b></span>
+                <div class="progress-bar-bg">
+                    <div id="catalog-progress-bar" class="progress-bar-fill"></div>
+                </div>
+            </div>
+            <div id="catalog-grid" class="catalog-grid">
+                <!-- Grid items populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Upgrade Catalog Modal -->
+    <div id="upgrade-catalog-overlay" class="hidden">
+        <div class="catalog-content">
+            <div class="catalog-header">
+                <h2>Upgrade Catalog</h2>
+                <button id="close-upgrade-catalog-btn">×</button>
+            </div>
+            <div id="upgrade-catalog-grid" class="catalog-grid">
+                <!-- Grid items populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Slot Overlay -->
+    <div id="save-slot-overlay">
+        <div class="minigame-content" style="max-width: 800px;">
+            <h2>SELECT SAVE SLOT</h2>
+            <p style="color:var(--text-muted); margin-bottom:2rem;">Choose a slot to load or start a new game.</p>
+            <div id="save-slots-container" style="display:flex; flex-direction:column; gap:1rem;">
+                <!-- Slots populated by JS -->
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
-
 
 </html>
