@@ -32,12 +32,12 @@
                 </div>
                 <div class="stat-box">
                     <span class="label">Global Online</span>
-                    <span id="global-online" class="value" style="color:var(--text-main)">Loading...</span>
+                    <span id="global-online" class="value">Loading...</span>
                 </div>
                 <!-- Local is usually just 1 (You), but let's pretend -->
                 <div class="stat-box">
                     <span class="label">Local Network</span>
-                    <span id="local-online" class="value" style="color:var(--text-main)">1</span>
+                    <span id="local-online" class="value">1</span>
                 </div>
             </div>
         </header>
@@ -45,13 +45,10 @@
         <main>
             <div id="left-panel">
                 <div class="panel upgrades-panel">
-                    <div
-                        style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; padding-bottom: 0.5rem;">
-                        <h2 style="border:none; margin:0; padding:0;">Upgrades</h2>
-                        <button id="view-upgrades-btn"
-                            style="background:transparent; border:1px solid var(--border-color); color:var(--text-muted); cursor:pointer; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem;">View
-                            All</button>
-                    </div>
+                    <h2>
+                        Upgrades
+                        <button id="view-upgrades-btn">View All</button>
+                    </h2>
                     <div id="upgrades-list" class="scroll-list">
                         <!-- Upgrades populated via JS -->
                     </div>
@@ -60,46 +57,52 @@
 
             <div id="center-panel">
                 <div id="key-display">
-                    <div class="key massive-key" id="main-key">SPACE</div>
+                    <div class="massive-key" id="main-key">SPACE</div>
                     <div id="floating-text-container"></div>
                 </div>
                 <div id="active-minigame" class="hidden">
                     <!-- Minigame UI -->
                 </div>
 
-
-
                 <p class="instruction">Press <span id="target-key-name">SPACE</span> to generate presses!</p>
-                <div id="active-keys-list"
-                    style="margin-top:0.5rem; color:var(--text-muted); font-size:0.9rem; text-align:center; max-width:400px; word-wrap:break-word;">
+                <div id="active-keys-list">
                     Active Keys: Space, W, A, S, D
                 </div>
 
-                <div class="minigame-selector-panel">
+                <div class="minigame-selector-panel" id="minigame-selector-panel">
                     <h3>Minigames</h3>
                     <div style="display:flex; gap:10px; margin-top:10px;">
                         <button id="btn-speed" class="challenge-btn">Speed Challenge</button>
                         <button id="btn-reaction" class="challenge-btn">Reaction Test</button>
                     </div>
-                    <div id="minigame-status" style="margin-top:5px; color:var(--secondary-color); font-size:0.9rem;">
+                    <div id="minigame-status" style="margin-top:5px; color:var(--secondary); font-size:0.9rem;">
                         Ready</div>
                 </div>
             </div>
 
             <div id="right-panel">
                 <div class="panel achievements-panel">
-                    <div
-                        style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; padding-bottom: 0.5rem;">
-                        <h2 style="border:none; margin:0; padding:0;">Achievements</h2>
-                        <button id="view-achievements-btn"
-                            style="background:transparent; border:1px solid var(--border-color); color:var(--text-muted); cursor:pointer; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem;">View
-                            All</button>
-                    </div>
+                    <h2>
+                        Achievements
+                        <button id="view-achievements-btn">View All</button>
+                    </h2>
                     <div id="achievements-list" class="scroll-list">
                         <!-- Achievements populated via JS -->
                     </div>
                 </div>
-                <div class="panel leaderboard-panel">
+                <div class="panel leaderboard-panel"
+                    style="margin-top: 1.5rem; height: calc(100% - 1.5rem - var(--panel-height));">
+                    <!-- Note: Adjusted margin/height logic might be needed if multiple panels -->
+                    <!-- Actually, grid layout handles height, but I'll leave the style attribute for specific spacing override if grid needs it -->
+                    <!-- Wait, I'll remove the style and let CSS grid handle it if possible, but the original HTML had two panels in one column. -->
+                    <!-- CSS Grid: main has 3 columns. left-panel and right-panel might contain multiple divs? -->
+                    <!-- Looking at original CSS: .panel had height 100%. If right-panel has 2 divs, they need to share height or be flex. -->
+                    <!-- Original HTML had 2 panels in right-panel. -->
+                    <!-- I'll wrap them in a flex container if needed, or just let them stack. Current CSS makes .panel height 100%. -->
+                    <!-- I should probably make .panel explicit height or flex-grow. -->
+                    <!-- I'll check my CSS for .panel. It says height: 100%. This is bad if there are 2 panels in one column. -->
+                    <!-- I will change the HTML structure of right-panel to be a flex column and panels to be flex-1. -->
+
                     <h2>Leaderboard</h2>
                     <div id="leaderboard-list" class="scroll-list">
                         <!-- Leaderboard entries -->
@@ -164,7 +167,7 @@
 
         <div id="corner-counter" class="corner-stat">
             <div class="label">Next Key Unlock</div>
-            <div id="corner-progress" style="font-weight:bold; color:var(--accent-color)">0 / 1000</div>
+            <div id="corner-progress" style="font-weight:bold; color:var(--accent)">0 / 1000</div>
             <div id="corner-remaining" style="font-size:0.8em; color:var(--text-muted)">1000 to go</div>
         </div>
 
