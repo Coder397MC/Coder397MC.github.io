@@ -501,8 +501,32 @@ button,
   color: #fff;
 }
 
-/* SAVE SLOTS */
+/* OVERLAY SYSTEM */
+#save-slot-overlay,
+#minigame-overlay,
+#achievement-catalog-overlay,
+#upgrade-catalog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 #save-slot-overlay {
+  background: var(--bg-dark);
+  /* Solid background hiding everything */
+  z-index: 1000;
+  /* Highest priority */
+}
+
+#minigame-overlay,
+#achievement-catalog-overlay,
+#upgrade-catalog-overlay {
   background: rgba(5, 5, 5, 0.95);
   backdrop-filter: blur(10px);
 }
@@ -511,7 +535,6 @@ button,
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-light);
   border-radius: 1rem;
-  padding: 1.5rem;
   margin-bottom: 1rem;
   cursor: pointer;
   transition: var(--transition);
@@ -568,56 +591,66 @@ button,
 .hidden {
   display: none !important;
 }
+
 /* MINIGAME PLAY AREA */
 #minigame-play-area {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
 }
 
 .rhythm-target {
-    width: 70px;
-    height: 70px;
-    border: 3px solid rgba(255,255,255,0.2);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 800;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    background: rgba(255,255,255,0.05);
-    font-size: 1.5rem;
+  width: 70px;
+  height: 70px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 800;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 1.5rem;
 }
 
 .rhythm-target.hit {
-    background: var(--primary);
-    border-color: var(--primary);
-    box-shadow: 0 0 20px var(--primary-glow);
-    transform: scale(1.1);
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 20px var(--primary-glow);
+  transform: scale(1.1);
 }
 
 .rhythm-target.miss {
-    background: #ef4444;
-    border-color: #ef4444;
-    animation: shake 0.3s;
+  background: #ef4444;
+  border-color: #ef4444;
+  animation: shake 0.3s;
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
 }
 
 
 #corner-counter {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    padding: 1rem;
-    z-index: 100;
-    min-width: 150px;
-    text-align: right;
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 1rem;
+  z-index: 100;
+  min-width: 150px;
+  text-align: right;
 }
-
