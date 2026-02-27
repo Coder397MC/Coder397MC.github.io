@@ -10,7 +10,7 @@ Think Cookie Clicker, but powered by your keyboard.
   Press the active key(s) (starting with SPACE) to generate presses
 
   Accumulate Total Presses and increase your Presses Per Second (PPS) 
-
+     
   Unlock additional keys like W, A, S, D to expand gameplay  
 
   Spend presses on upgrades that boost efficiency!
