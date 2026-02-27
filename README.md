@@ -15,7 +15,7 @@ Think Cookie Clicker, but powered by your keyboard.
 
   Spend presses on upgrades that boost efficiency!
 
-  Complete achievements to track milestones
+  Complete achievements to track milestones          
 
   Compete against others on the leaderboard
 
