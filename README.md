@@ -1,6 +1,6 @@
 # Coder397MC.github.io
 GAME IS CURRENTLY DOWN 
-🎮 Keyboard Master (PLEASE PLAY WITH FULL SCREEN ON)  
+🎮 Keyboard Master (PLEASE PLAY WITH FULL SCREEN ON)        
       
 Keyboard Master is a browser-based incremental game where pressing keys turns into progress. Every keystroke counts. Unlock new keys, buy upgrades, earn achievements, compete on the leaderboard, and test your skills in fast-paced minigames.
 Think Cookie Clicker, but powered by your keyboard.
