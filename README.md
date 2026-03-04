@@ -3,7 +3,7 @@
           
 Keyboard Master is a browser-based incremental game where pressing keys turns into progress. Every keystroke counts. Unlock new keys, buy upgrades, earn achievements, compete on the leaderboard, and test your skills in fast-paced minigames.
 Think Cookie Clicker, but powered by your keyboard.
-         
+                     
 🕹️ Gameplay Overview           
 
   Press the active key(s) (starting with SPACE) to generate presses
